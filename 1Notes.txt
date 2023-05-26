@@ -1,0 +1,412 @@
+******************* WHERE I GOT DATA *************************
+******************* WHERE I GOT DATA *************************
+******************* WHERE I GOT DATA *************************
+avg transaction fee:
+btc_google_trends:
+btc_price_history:
+btc_price_history2:
+dji/dxy/sp500/gold/nsdaq:
+full_moons:
+new_moons:
+halvenings:
+m2:
+total_bitcoins:
+
+
+*********** IMPORTANT THOUGHTS ***********************
+*********** IMPORTANT THOUGHTS ***********************
+*********** IMPORTANT THOUGHTS ***********************
+
+Potency of your features (Piercing correct features)
+Good model(s) (Multiple models that hit it from different angles)
+Able to see the 4 year cycles of btc based on halvenings
+Doesn't overfit
+More weight on current/closer prices to today. (It should realize that yesterday's price is the best feature for tomorrows price as a baseline.)
+Able to predict (forecast) future prices. (Can LGBM do this?) 
+
+
+
+****************************************** FEATURES *****************************************************
+****************************************** FEATURES *****************************************************
+****************************************** FEATURES *****************************************************
+
+
+How do you pack a clump of historical data into a single row? Moving averages, lagged features, log returns over X days. EZ.
+
+CAN'T USE INFORMATION FROM THE FUTURE TO PREDICT THE PAST (Lookahead bias). MUST BE AVAILABLE AT THE TIME OF THE PREDICTION.
+
+The model's features indeed need to be carefully constructed based on past information, and this is a critical part of the model-building process. Feature engineering, including creating lagged features, is a key element of time series forecasting.
+
+Lagged features are a common approach to incorporate historical information into the model. For example, if we're predicting the return of a cryptocurrency for tomorrow, we might create features representing the return of the cryptocurrency for the past N days (e.g., return_1day_ago, return_2days_ago, ... return_Ndays_ago). These lagged features give the model information about recent trends in the data.
+
+However, it's not just about lagging all the features. It's also important to think about what other kinds of information might be predictive. For example, features representing the volatility of the returns, the volume of trades, or the average return over the past week could be useful. Maybe even features derived from other related cryptocurrencies could help. It's up to the competition participants to use their domain knowledge and creativity to come up with useful features.
+
+calculating asset returns.
+Log returns:
+In order to analyze price changes for an asset we can deal with the price difference. However, different assets exhibit different price scales, so that the their returns are not readily comparable. We can solve this problem by computing the percentage change in price instead, also known as the return. This return coincides with the percentage change in our invested capital.
+Returns are widely used in finance, however log returns are preferred for mathematical modelling of time series, as they are additive across time. Also, while regular returns cannot go below -100%, log returns are not bounded.
+To compute the log return, we can simply take the logarithm of the ratio between two consecutive prices. The first row will have an empty return as the previous value is unknown, therefore the empty return data point will be dropped.
+
+"# define function to compute log returns
+def log_return(series, periods=1):
+    return np.log(series).diff(periods=periods)"
+
+***TA/Moving Average Concerns***
+
+Moving averages and many other TA indicators are based on past data. For example, a simple moving average with a window size of 10 takes the average of the past 10 data points. This doesn't cause lookahead bias because it's only using past data, not future data.
+
+However, the tricky part comes in aligning the features with the target variable (the value we're trying to predict). If we're trying to predict the return for tomorrow, we need to make sure all of our features are based on information available today or earlier. This is where lagging comes in.
+
+To avoid lookahead bias, we should lag our features by one day. In other words, if we're predicting the return for tomorrow, we would use the moving average calculated up to today as a feature, not the moving average calculated up to tomorrow. This ensures that our prediction for tomorrow is based entirely on information that's available today or earlier.
+
+It's worth noting that most TA indicators are designed to be used in this way, as they're meant to be predictive of future price movements. However, it's crucial to ensure they're calculated and lagged correctly to avoid lookahead bias when used in a predictive model.
+
+
+- For feature engineering: Spearman/pearson/mutual Information/trends/seasonality/distribution of data
+- Target Encoding (If score worse than the baseline, likely the extra info gained by the encoding didn't make up for the loss of data used for the encoding.)
+- PCA (For instance, if you have two very similar features, both might have a high MI with the target variable, but including both in your model might not improve your model's performance because they don't provide unique information. In such cases, additional techniques like Principal Component Analysis (PCA) or correlation analysis might be needed to identify and remove redundant features.)
+
+Twitter concerns:
+- The Twitter tool examines tweets containing the word “bitcoin” that were posted on Twitter in the past minute. It then uses an AI technique known as sentiment analysis to analyze a tweet’s polarity (how positive or negative the text is) and subjectivity (how factual or opinionated the text is).
+- Maybe only verified users.
+- Twint allows for scraping tweets without Twitter API. tweet.py also helpful.
+-Since VADER is a rule-based method of sentiment analysis, we used it to manually label our dataset. It has an F1 score of 0.96 and is reported to outperform human raters [15]. VADER takes into account negations and contractions (“not good”, “wasn’t good”) punctuation (“good!!!”), capitalized words, text-based
+‘emotes’ (for example: “:)”, emotion intensification (very, kind of), acronyms, and scores tweets between -1.0 (negative) and 1.0 (positive). 
+
+TARGET:
+additivity over time. Forecasting returns over the next 15 minutes, using a slight forward shift in calculating the return to ensure that the target is strictly IN THE FUTURE relatie to the features, avoiding lookahead bias.
+log-returns for the asset over a 15 minute horizon. Ra(t)=log(Pa(t+16) / Pa(t+1)) Where R is the log return and P is the price.
+
+ROLLING WINDOW:
+train_window = [totimestamp("01/05/2021"), totimestamp("30/05/2021")]
+test_window = [totimestamp("01/06/2021"), totimestamp("30/06/2021")]
+
+WICKS & Features: 
+"# Select some input features from the trading data: 
+# 5 min log return, abs(5 min log return), upper shadow, and lower shadow.
+upper_shadow = lambda asset: asset.High - np.maximum(asset.Close,asset.Open)
+lower_shadow = lambda asset: np.minimum(asset.Close,asset.Open)- asset.Low
+
+X_btc = pd.concat([log_return(btc.VWAP,periods=5), log_return(btc.VWAP,periods=1).abs(), 
+               upper_shadow(btc), lower_shadow(btc)], axis=1)"
+
+May need to only scale features, and not target, sometimes both though.
+
+******* 5 min log return based on VWAP
+******* 1 min log return based on absolute value of VWAP, to get a sense of the absolute volatility.
+******* WICKS 
+***ATR
+******Hull Moving average (a more smoothed MA to minimize noise)
+***News headlines (scrape or else, convert to features, mostly for peaks/valleys)
+***gold prices
+***Time in Trade Output Feature (How long hold before sells)
+******normalize the price : with MinMaxScaler (or look into log or 0-1 range.)
+***Hourly/Weekly BTC Price
+***major worldwide holidays (And USA/China/Russia)
+***eclipses, etc. (Astral events/Year of Jubilee, etc.)
+***ETH
+***JP225
+***Marketcap (Closing price * circulating supply)
+***'Bear/Bull phase feature' seasonality (Do i even need when i have the halvening?)
+******CVDD from woobull
+***Google trends
+***Smart money feature(s)
+***Jim Cramer Metric
+***Twitter Sentiment(s) (# tweets on that day, # postive ones, # negative ones (And -1 to 1 on how positive/negative)) (Twint, tweepy)
+***Twitter (How many likes/retweets the tweet got, date, url, user, timestamp, replies etc.)
+***OHLC+Vol from top exchanges
+***Treasury 2yr/5yr/10tr
+***Indicators (RSI, SMA, EMA, Stoch K, Stoch D, AD, CCI, MACD, RSI 'divs') (Undertanding WHAT the indicator tries to accomplish and calculate is very important, momentum? What is the essence of the indicator and how does it effect price?. Indicators are all mostly just a synthesis of price movement and time.). How do you get it to recognize, for instance, a 'RSI reset of the 50 and then continuation' type of momentum? How will it recognize RSI divs?
+***Heikenashi/renko candles
+***Amount leveraged feature (GMX.io/binance/kraken maybe?)
+***optimal entry size and levels features/outputs.
+Average Payments per block
+Total number of executed trades (Can get from Binance API or other sites)
+Total number of transactions
+mean block size
+Blocks Size
+Mean Tx Size
+Total fees (USD)
+Cost per Transaction
+Cost Per Transaction by Percentage
+Difficulty
+Estimated Transaction Volume
+Estimated Transaction Volume in USD
+mean hash rate
+Hashrate
+Market Capitalization
+Market Price
+Median Confirmation TIme
+Miner’s Revenue
+Number of Orphaned Blocks
+Number of Transactions
+Number of Transactions excluding Chains longer than 100
+Number of Transactions excluding Popular
+Number of Transactions per Block
+Number of Transactions in Total
+Number of Unique Addresses
+Output Volume
+Total number of Bitcoins
+Transaction Fees
+Transaction Fees in USD
+UTXO Count 
+Bip 9 Segwit
+Bitcoin Unlimited’s Share
+Mempool Count
+Mempool Growth
+Mempool Size
+Mempool State by Fee Level
+Number of Wallets on Blockchain.info
+NYA Support 
+Block Size Votes on each Exchange
+Confirmation Time in each Exchange
+Block Version of each Exchange
+Block Size of each Exchange
+Difficulty in each Exchange
+Hash Rate of each Exchange
+Transaction Count in each Exchange
+Arbitrage in each Exchange
+Bid-Ask Sum in each Exchange
+Book Value in each Exchange
+Market’s Capitalization in USD for each Exchange
+Market’s Capitalization for each Exchange
+Price in each Exchange
+Price-Volume of each Exchange
+sum block weight
+Rank of each Exchange
+Spread of each Exchange
+Trades per Minute in each Exchange
+Volatility of each Exchange
+Volume of each Exchange 
+
+
+****************************************** MODELS *****************************************************
+****************************************** MODELS *****************************************************
+****************************************** MODELS *****************************************************
+(DIFFERENT SEEDS FOR DIFFERENT MODELS)
+It really looks like LGBM or LSTM, or an ensemble of them works best.
+An LGBM for each 'up, down, sideways' markets. (3 LGBM's) 
+Add gaussian noise to all features/targets (apparently this works can be better than traditional scaling, and is kina like scaling or 'Rank Gaussian')
+Can manually choose different market conditions to validate on.
+
+Models:
+-LSTM (min 2 layers, max 6), parameter setting of each layer of units in [32, 64, 128, 256, 512] (Activation ReLU) (LTSM using tanh for activation function)
+LSTM models perform better with scaled data, so consider normalizing or standardizing your input data.
+-LGBM
+-GRU (Good with LSTM?)
+-MLP is a basic method in prediction.
+
+Errors/Evaluation: 
+-Pearson correlation coefficient (G-research) (How close your predicted price was to the actual price)
+"print('Test score for LR baseline: BTC', f"{np.corrcoef(y_pred_lr_btc, y_btc_test)[0,1]:.2f})"
+-RMSE
+-R2
+-MAPE (Percentage Error) Shitty because y=0 or near 0 skews, and assumes unit of measurement has a meaningful zero point (unlike temperature for example). Also puts heavier penality on negative error than positive errors.
+-MASE (Mean absolute Scaled error) = mean(|q|) (Scaled)
+-RMSPE
+-DA
+
+-Hyperparameter tuning with Optuna (Bayesian Optimization)
+-LSTM and Hybrid model development: Construct your LSTM model, possibly complementing with other models (like GRU, MLP) in a hybrid or ensemble method.
+-Probability distribution output: Consider models like Mixture Density Networks (MDNs) or generative models which can output a probability distribution.
+-LGBM classifier? (for simply price up or down?)
+
+Time Serires Concerns:
+Trend, Seasonality, Cycles, reducing the residuals and plotting periodograms to see deseasonalized and detrended data.
+PACF # Examine our deseasonalized series for serial depdence via partial autocorrelation correlogram and lag plot.
+
+BOOSTED HYBRID!!:
+
+# Initialize BoostedHybrid class with LinearRegression() and XGBRegressor() instances.
+model = BoostedHybrid(model_1=LinearRegression(), model_2=XGBRegressor())
+# fit and predict
+model.fit(X_1, X_2, y)
+y_pred = model.predict(X_1, X_2)
+# May want other hybrid combinations than (linear regression + XGBoost) hybrid, depending on the problem.
+
+*************** ROLLING STATISTICS ************************
+
+# MA and other rolling statistics help forecast and estimate trends. If doing rolling statistics for features, we need to take care to avoid "lookahead leakage". 
+# 1. The result should be set at the right end of the window instead of the center. We should use center=False (the default) in the rolling method. 
+# 2. The target should be lagged a step.
+
+y_lag = supply_sales.loc[:, 'sales'].shift(1)
+onpromo = supply_sales.loc[:, 'onpromotion']
+# 28-day mean of lagged target
+mean_7 = y_lag.rolling(7).mean()
+# 14-day median of lagged target
+median_14 = y_lag.rolling(14).median()
+# 7-day rolling standard deviation of lagged target
+std_7 = y_lag.rolling(7).std()
+# 7-day sum of promotions with centered window
+promo_7 = onpromo.rolling(7, center=True).sum()
+
+# Also try "exponential weighted" windows by using 'ewm' in place of 'rolling'; exponential decay can be a better representation of how effects propagate over time.
+
+
+***Tips***
+- PCA can be great.
+- Different types of autoencoders such as denoising, variational and sparse encoders could be good.
+- The highest classification accuracy is achieved by LSTM with the accuracy of 52% and a RMSE of 8%. (30 and 60 day predictions)
+- During training, higher batch size gave worst the prediction on the test set. (Since more training, the more prone to overfitting the model becomes.)
+- Other tested architectures had multiple LSTM layers. However, this lead to overfitting issues due to the model being too complex for the data set. Furthermore, architectures without normalization were also trained. This also led to the model over fitting and being bad.
+-Before settling on L2 regularisation, batch normalisation was also applied in an experiment. This led to the model not learning anything from the data, as the training error stayed flat during the training process. Training models with multiple dense layers led to similar issues as using multiple LSTM layers did. The dense layer has a set number of dense nodes, which is 1. The reason for this parameter setting is that the model is trying to predict a single value, which is the closing price.
+- Bitcoin price per minute, arranged them into Bitcion price per hour, a total of 56,832 points. We took 24 hours of data as input and output the Bitcoin price of the next hour. 
+-Long Short-Term Memory (LSTM) provides relatively the best prediction when past memory and Gated Recurrent Network (GRU) is included in the model. (by minute, and contains around 3,409,920 points.), therefore hourly is 56,832 rows.
+
+
+MLP (Multilayer perceptron): Takes in X number of inputs(2: my weight, my height) and it can output a different amount (3: my squat, bench deadlift)
+Why do we have multiple hidden layers with activation functions? We are able to do non-linear predictions!
+For example, with two feature neurons, and 4 neurons in one hidden layer, and one output neuron/activation layer, we can do non-linear outputs and sort/predict complex things. Hidden layers help to do  harder/complex predictions.
+-the MLP models are converted to 'tf-lite' interpreters. Speeds up process. Each MLP had 49 layers. Train/test split can also be fine instead of CV.
+
+
+-Tweaking the model to have a non-linear topology or building a ResNet-like structured network for tabular data led to some amazing results during the Jane Street Market Prediction.
+
+*** Model example ***
+-LOG the price data, or even do it into a range of 0 to 1.
+
+scaler=MinMaxScaler(feature_range=(0,1))
+closedf=scaler.fit_transform(np.array(closedf).reshape(-1,1))
+print(closedf.shape)
+
+
+model=Sequential()
+model.add(LSTM(10,input_shape=(None,1),activation="relu"))
+model.add(Dense(1))
+model.compile(loss="mean_squared_error",optimizer="adam")
+history = model.fit(X_train,y_train,validation_data=(X_test,y_test),epochs=200,batch_size=32,verbose=1)
+
+(if you transform prices to (0-->1) then you can inverse transform before evaluation)
+train_predict = scaler.inverse_transform(train_predict)
+test_predict = scaler.inverse_transform(test_predict)
+original_ytrain = scaler.inverse_transform(y_train.reshape(-1,1)) 
+original_ytest = scaler.inverse_transform(y_test.reshape(-1,1)) 
+
+Evaluation:
+print("Train data RMSE: ", math.sqrt(mean_squared_error(original_ytrain,train_predict)))
+print("Test data RMSE: ", math.sqrt(mean_squared_error(original_ytest,test_predict)))
+print("Train data R2 score:", r2_score(original_ytrain, train_predict))
+print("Test data R2 score:", r2_score(original_ytest, test_predict))
+
+
+****************************************** OUTPUT/GOALS/CONCERNS/PHILOSOPHY/TIPS *****************************************************
+****************************************** OUTPUT/GOALS/CONCERNS/PHILOSOPHY/TIPS *****************************************************
+****************************************** OUTPUT/GOALS/CONCERNS/PHILOSOPHY/TIPS *****************************************************
+- Do you want it to predict prices or rather ranges and probabilities?
+- May be: Modeling>>>feature engineering. And creativity, outside the box on how fundamentally models work on different types of data.
+- Stable and robust pipeline is important.
+- If you have too many hidden layers, or too many neurons in a hidden layer, then it can overfit to the training data.
+- Ensembles generally only improve the performance if the models learn something different, i.e. if they are trained with different data. Combing the results of different models adds variety to your solution thus making it more robust and stable. No matter what modeling tricks worked or not, ensembling was always my “last resort” during competitions.
+- Look out for extreme dependence of seeds for different models. I also found this for my single models. Using many models trained from different seeds kinda solves this issue. Like fighting fire with fire, fight randomness with randomness.
+- Future: expand model to different asset classes and scanning capabilities. (Cryptos, Stocks, Bonds Indices, and Commodities). And then finally trading ideas based on the models predictions. 
+- Use kaggles 'Time Series' guide stuff in my word doc, that had some really interesting things (Trend/Seasonality/reducing residuals, PACF, etc.).
+- Voting/Stacking/Blending/Bagging/Ensembling/classification
+
+***Time Series Decomposition Concerns***
+Thus we think of a time series as comprising three components: a trend-cycle component, a seasonal component, and a remainder component (containing anything else in the time series).
+
+
+***Exponential Smoothing Concerns***
+Forecasts produced using exponential smoothing methods are weighted averages of past observations, with the weights decaying exponentially as the observations get older. In other words, the more recent the observation the higher the associated weight. This framework generates reliable forecasts quickly and for a wide range of time series, which is a great advantage and of major importance to applications in industry.
+https://otexts.com/fpp2/expsmooth.html
+
+
+***Holdout/Validation/TimeSeriesSplit/CV & GroupTimeSeriesSplit*** 
+https://otexts.com/fpp2/accuracy.html
+
+- training data takes up to 80% of the entire dataset, and validating and testing 10% respectively
+- The training dataset with 730 entries was divided into three subsets, training, validation and testing, by randomly determining the indices for each data point. The training set accounts for 70% of the data set while both the validation and test set were 15% each. After training the ensemble, the backtesting dataset will be used to test the network to predict the next day change in Bitcoin’s price.
+- Split your data: Separate your data into training, validation, and testing sets.
+- Train/validation/test in this order by time.
+
+GTSS: Note however, that in the first split shown above we are validating our chronological data on the past. Our model has been trained using information which wasn't yet available at the time of the validation set. This is clear leakage; we are predicting the past with knowledge from the future. But our aim is to predict data in the future! This problem has already been addressed by scikit-learn in the form of TimeSeriesSplit: But what is the problem this time? TimeSeriesSplit does not respect the groups available in the data. Although not clearly visible in this plot, we can imagine that a group can partially fall in the training set and partially in the test set. That would mean that we are training on half of the trades of a certain day, just to validate their performance on the other half of the trades of that day. What we of course want is to train on all trades of a particular day, and to validate them on the day that follows! Otherwise again leaking will occur. The GroupKFold iterator does respect groupings: no group will ever be part of two folds. Unfortunately, it is also clear that it mixes up the order completely and thus loses the temporal dimension again. What we need is a a crossover between GroupKFold and TimeSeriesSplit: GroupTimesSeriesSplit. The feature that GroupTimeSeriesSplit adds to this is that the train and test set always remain their order.
+https://www.kaggle.com/code/gogo827jz/jane-street-ffill-xgboost-purgedtimeseriescv (GTSS, FFill, XGB, PurgedTSCV)
+https://www.kaggle.com/code/marketneutral/purged-time-series-cv-xgboost-optuna
+
+
+***Data/Information Leakage Concerns between train/test***
+
+I understand why financial predictions are tough. All forms of traditional indicators, you cannot train your model on them. This is because u cant train a model on information in the future, it sounds obvious but its pretty subtle when messing with training sets. So if you wanted to use an indicator to try and predict the future price of BTC, u couldn't train your model directly on it. Instead, you would have to future predict what that indicators value would be, AND THEN use that future prediction as a feature in your main model and so the more nested predictions you have, the more like a house of cards it is, so basically you dont want to do that, (basing your predictions off of other models predictions, extrapolating way too far). So its really hard to come up with potent features to train a model on.
+
+***Trading/Money/Risk/Volatility Concerns***
+
+- If you get the predictions accurate, then you can just make a trading strategy that buys or sells accordingly.
+Entropy of Information. Volatility. Risk management. Odds of each various chance to win. Reducing volatility when trading vs increased volatility for long shots. Philosophy: What is the value of money, and opportunity costs, and diminishing returns?
+https://en.wikipedia.org/wiki/St._Petersburg_paradox#Finite_St._Petersburg_lotteries
+https://en.wikipedia.org/wiki/Kelly_criterion#Application_to_the_stock_market
+
+
+
+***EDA/Plots/etc***
+
+Correlations: The correlation heat map for Bitcoin and other variables. Bitcoin has a positive correlation with other cryptocurrencies, commodity prices, stock market indexes, and public attention variables. The only exception is that the price of Bitcoin is inversely correlated with the 10-year U.S. Treasury yield in the commodities category. The price of Bitcoin and the exchange rate generally show a negative correlation. It seems understandable that the stronger the US dollar, the lower the price of Bitcoin. Interestingly, the Russian ruble exchange rate has a positive correlation with the Bitcoin price, and the correlation coefficient is high. (MAP SHOWS: all the features correlation with eachother)
+
+
+
+***Output/Goal*** 
+
+-Output would be price prediction for next 7 candles (weekly, daily, monthly, etc.). It would be a probability distribution, where like 0.5% probability of range 31,500-31,600, and would sum up to 100. Or really (current price*1.01 to current price*1.02) = 0.1% or whatever. And that for lower and higher, so you get this kind of rainbow of where the price might be going and the weights. And then you can link it to any coin! (Although features might vary from coin to coin, so would be inaccurate or overfit possibly). Determine the most potent features (is it sentiment, or price action?)
+
+-I envision this model to output a rainbow distribution range of prices and probabilities, and then each candle would just be the peak of the distribution curve as a final prediction?
+
+-What kinds of things have an effect and how exactly does the price react? Meaning, yes certain indicators crossing or showing signs tends to lead to "up". But what does the "up" look like, precisely? If you did analysis on what the "up" looked like precisely over the future n days, then you could better predict the future price. Because it's not just "ok now it's 70% chance to go up, 30% chance to go down". It's something like "Ok now it's x% to go up y% and a distribution curve of all those x:y% pairs, and you can even include the time for x% to happen and things like that, etc
+(BACKTESTING.PY for trading)
+
+***Resources***
+
+-   https://www.kaggle.com/code/stpeteishii/bitcoin-tweets-sentiment-analysis (VADER SENTIMENT FOR BTC TWEETS)
+-   https://www.hindawi.com/journals/cin/2021/8128879/ (LGBM+LSTM Economic Forecasting Model)
+-   https://towardsdatascience.com/implementation-differences-in-lstm-layers-tensorflow-vs-pytorch-77a31d742f74 (LSTM for pytorch vs Tensor)
+-   https://www.kaggle.com/code/bturan19/lgb-3fold-rollingagg-lagtarget-submissioninference/notebook (G-Research #9 PLACE!)
+-   https://www.kaggle.com/competitions/g-research-crypto-forecasting/discussion/323703 (Feature discussion G-Research 3rd)
+
+
+*** BASICS TUTORIAL (BTC+ETH) Financial Predictions G-Research Competition ***
+https://www.kaggle.com/code/cstein06/tutorial-to-the-g-research-crypto-competition/notebook
+*** GREAT TO SHOW OFF YOUR EDA (Correlation between assets, visualizing log returns)***
+
+***BTC Specific LSTM Resources:***
+
+1. https://www.kaggle.com/code/jphoon/bitcoin-time-series-prediction-with-lstm (Great)
+2. https://www.kaggle.com/code/meetnagadia/bitcoin-price-prediction-using-lstm#5.-Building-LSTM-Model (Good)
+3. https://www.kaggle.com/code/faressayah/stock-market-analysis-prediction-using-lstm/notebook (talks about risk, has some nice plots, GOOD)
+5. https://www.kaggle.com/code/ysthehurricane/advanced-stock-pred-using-svr-rfr-knn-lstm-gru/notebook (LSTM and GRU)
+6. https://www.kaggle.com/code/raoulma/ny-stock-price-prediction-rnn-lstm-gru/notebook (Good)
+8. https://www.kaggle.com/code/mekhdigakhramanian/bitcoin-price-prediction-for-10-days-lstm-vs-gru (simple, but bad LSTM, but good article)
+9. https://www.kaggle.com/code/pavfedotov/lstm-to-predict-bitcoin-price (Simple good)
+10. https://www.kaggle.com/code/alibulut1/bitcoin-price-prediction-with-using-lstm (Good)
+11. https://www.kaggle.com/code/shiratorizawa/bitcoin-closing-price-predict-simplernn-vs-lstm (Good, talks about how to choose features)
+13. https://www.kaggle.com/code/abdallahwagih/bitcoin-stock-prediction-using-lstm#LSTM-Model (GOOD, contains multi-variable too)
+14. https://www.kaggle.com/code/p7476762/bitcoin-predict-close-target-with-lstm (VERY GOOD, G-research with BTC)
+15. https://www.kaggle.com/code/debashis74017/time-series-forecasting-itcoin-price (LSTM V GOOD, Also MLP good)
+16. https://www.kaggle.com/code/iamllanjay/lstm-gru-on-prediction-of-bitcoin-price (Simple, LSTM+GRU good)
+17. https://www.kaggle.com/code/ivanvarlamov/my-lstm-tutorial-witn-btc-price (Very GOOD, concise, also has theory)
+18. https://www.kaggle.com/code/salmanfaroz/ethereum-eda-and-recurrent-neural-network-lstm (ETH, smoothed, ehh)
+19. https://www.kaggle.com/code/tenebris97/btc-price-prediction-lstm-technical-analysis#RNN-(LSTM) (Good, Talks about which features to consider, Has trading in it too)
+
+4. https://www.kaggle.com/code/ysthehurricane/tesla-stock-price-prediction-using-gru-tutorial/notebook (GRU)
+7. https://www.kaggle.com/code/akashmathur2212/bitcoin-price-prediction-arima-xgboost-lstm-fbprop (XGBoost good)
+
+
+
+***Model Examples***
+
+def lstm_layer (hidden1) :
+    
+    model = Sequential()
+    
+    # add input layer
+    model.add(Input(shape = (500, 2, )))
+    
+    # add rnn layer
+    model.add(LSTM(hidden1, activation = 'tanh', return_sequences = False))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.2))
+    
+    # add output layer
+    model.add(Dense(1, activation = 'linear'))
+    
+    model.compile(loss = "mean_squared_error", optimizer = 'adam')
+    
+    return model

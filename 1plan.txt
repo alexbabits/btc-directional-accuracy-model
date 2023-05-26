@@ -1,0 +1,25 @@
+ML dumb --> 90%+ focus on coding professional traders minds into a bot.
+ML can still give edge, more like a brute force method without intricacies of a trading strategy.
+ML could be used to polish/ensemble with trading strategies. Combine forces.
+
+
+QUESTIONS:
+
+Maybe the more complex things for example don't one-hot encode moon cycles, you do it like halvenings with a count until the next moon basically?
+
+HOW TO ADD FEATURES (LOG RETURNS!@#!@#, WICKS!@#!@#!@, moons, complex ones)????
+(HOW DO LAGGING FEATURES WORK FOR MY DATA (My sliding window for DataY is already 1 step ahead))
+So how would more than 1 day lag features work? Like I want a 5 day lag on something for example?
+Log returns over 1/2/3/4/ etc days.
+
+
+Recording Results:
+
+Features (2): btc_close, volume
+Train/Test: 90%/10%
+(Train/Val)/Test: (50% of 90%/50% of 90%)/10%
+Scaling: MinMaxScaler (Separate for each feature)
+type: float64
+Time Step: 10
+Architecture: LSTM: 256, Dropout 0.2, Dense 1, MSE & adam default, 40 epochs, batch_size 50
+Errors: Train Score: 360.83 RMSE, Val Score: 1472.09 RMSE, Test Score: 771.89 RMSE
