@@ -74,12 +74,9 @@ Twitter concerns:
 ‘emotes’ (for example: “:)”, emotion intensification (very, kind of), acronyms, and scores tweets between -1.0 (negative) and 1.0 (positive). 
 
 TARGET:
-additivity over time. Forecasting returns over the next 15 minutes, using a slight forward shift in calculating the return to ensure that the target is strictly IN THE FUTURE relatie to the features, avoiding lookahead bias.
+additivity over time. Forecasting returns over the next 15 minutes, using a slight forward shift in calculating the return to ensure that the target is strictly IN THE FUTURE relative to the features, avoiding lookahead bias.
 log-returns for the asset over a 15 minute horizon. Ra(t)=log(Pa(t+16) / Pa(t+1)) Where R is the log return and P is the price.
 
-ROLLING WINDOW:
-train_window = [totimestamp("01/05/2021"), totimestamp("30/05/2021")]
-test_window = [totimestamp("01/06/2021"), totimestamp("30/06/2021")]
 
 WICKS & Features: 
 "# Select some input features from the trading data: 
@@ -200,7 +197,6 @@ Errors/Evaluation:
 -Pearson correlation coefficient (G-research) (How close your predicted price was to the actual price)
 "print('Test score for LR baseline: BTC', f"{np.corrcoef(y_pred_lr_btc, y_btc_test)[0,1]:.2f})"
 -RMSE
--R2
 -MAPE (Percentage Error) Shitty because y=0 or near 0 skews, and assumes unit of measurement has a meaningful zero point (unlike temperature for example). Also puts heavier penality on negative error than positive errors.
 -MASE (Mean absolute Scaled error) = mean(|q|) (Scaled)
 -RMSPE

@@ -12,14 +12,30 @@ HOW TO ADD FEATURES (LOG RETURNS!@#!@#, WICKS!@#!@#!@, moons, complex ones)????
 So how would more than 1 day lag features work? Like I want a 5 day lag on something for example?
 Log returns over 1/2/3/4/ etc days.
 
+How would I weight prices closer to the closest day?
 
 Recording Results:
 
 Features (2): btc_close, volume
 Train/Test: 90%/10%
-(Train/Val)/Test: (50% of 90%/50% of 90%)/10%
+(Train/Val)/Test: (50/50)/10
 Scaling: MinMaxScaler (Separate for each feature)
 type: float64
 Time Step: 10
 Architecture: LSTM: 256, Dropout 0.2, Dense 1, MSE & adam default, 40 epochs, batch_size 50
 Errors: Train Score: 360.83 RMSE, Val Score: 1472.09 RMSE, Test Score: 771.89 RMSE
+
+
+Features (2): btc_close, volume
+Train/Test: 90%/10%
+(Train/Val)/Test: (50/50)/10
+Scaling: MinMaxScaler (Separate for each feature)
+type: float64
+Time Step: 40
+Architecture: LSTM: 256, Dropout 0.2, Dense 1, MSE & adam default, 40 epochs, batch_size 50
+Errors: Train Score: 420.57 RMSE, Val Score: 1630.15 RMSE, Test Score: 888.97 RMSE
+
+512 neurons
+Train Score: 370.19 RMSE
+Val Score: 1507.30 RMSE
+Test Score: 841.28 RMSE
