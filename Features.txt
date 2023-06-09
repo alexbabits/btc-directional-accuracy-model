@@ -1,0 +1,49 @@
+***FEATURES TO CONSIDER - many will be closely correlated, therefore most are redundant and would be useless***
+
+***NUMERIC FEATURES - attempts to describe price movement, supply, and demand of an asset***
+
+BTC Price (OHLC + Wick Features)
+BTC Volume
+BTC Volatility
+BTC Days From/To Halvening
+Number BTC Mined Total
+Number BTC Mined at Time Intervals
+Avg Transaction Fee
+ETH price
+TradFi Prices (DJI/DXY/SP500/NASDAQ/M2 supply/Bonds/GOLD/SILVER)
+Full Moons/New Moons
+Time: Day of week, Day of Month, Month, Year, Weekend, Weekday, Holidays
+Smart Money Tracking
+Indicators (ATR, RSI, SMA, EMA, Stoch K, Stoch D, AD, CCI, MACD, RSI divs, Hull Moving average (Smoothed MA to minimize noise))
+CVDD and other indicators from woobull
+Heikenashi/renko candles
+Total Amount Leveraged (GMX.io/binance/kraken/Kucoin/Huobi etc.)
+Average Payments per block
+Total number of transactions
+Total number of transactions per block
+Total Transactions
+Total number of trades
+mean block size
+Blocks Size
+Mean Tx Size
+Total Miner Revenue
+Median Confirmation Time
+Mining Difficulty
+Hash Rate & Mean Hash Rate
+Transaction Volume
+Number of Unique Addresses
+UTXO Count 
+Mempool Count
+Mempool Growth
+Mempool Size
+Mempool State by Fee Level
+Bid-Ask liquidity
+
+***SENTIMENT FEATURES - attempts to estimate the amount of demand of an asset***
+
+BTC Google Trends
+BTC Twitter Sentiment (Twint tweet.py, only verified users, VADER)
+Crypto Twitter Sentiment
+TradFi Twitter Sentiment
+Jim Cramer Sentiment
+News Headlines

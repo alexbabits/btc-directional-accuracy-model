@@ -1,0 +1,34 @@
+Tools/Resources used:
+
+Yahoo Finance: GOLD/DJI/DXY/SP500/NASDAQ
+Full/New Moons: NASA https://aa.usno.navy.mil/data/MoonPhases
+Halvenings: Google
+ChatGPT-3.5 & ChatGPT-4
+https://www.blockchain.com/explorer/charts (no sentiment)
+https://www.lookintobitcoin.com/ (no sentiment)
+https://studio.glassnode.com/home/charts (no sentiment)
+https://data.bitcoinity.org/markets/volume/30d?c=e&t=b (Exchanges data and some basics)
+https://charts.woobull.com/ (interesting indicators)
+https://charts.coinmetrics.io/ (historic price)
+https://blockchair.com/bitcoin/charts (no sentiment)
+https://fred.stlouisfed.org/ (TradFi)
+https://www.epochconverter.com/batch (tool for timestamps)
+https://github.com/cjhutto/vaderSentiment (VADER Sentiment)
+https://arxiv.org/ftp/arxiv/papers/2303/2303.09397.pdf (Sentiment project with twitter)
+https://www.kaggle.com/code/stpeteishii/bitcoin-tweets-sentiment-analysis (VADER SENTIMENT FOR BTC TWEETS)
+https://www.hindawi.com/journals/cin/2021/8128879/ (LGBM+LSTM Economic Forecasting Model)
+https://www.kaggle.com/code/bturan19/lgb-3fold-rollingagg-lagtarget-submissioninference/notebook (G-Research #9)
+https://www.kaggle.com/competitions/g-research-crypto-forecasting/discussion/323703 (Feature discussion G-Research #3)
+https://www.kaggle.com/code/jphoon/bitcoin-time-series-prediction-with-lstm 
+https://www.kaggle.com/code/meetnagadia/bitcoin-price-prediction-using-lstm#5.-Building-LSTM-Model 
+https://www.kaggle.com/code/faressayah/stock-market-analysis-prediction-using-lstm/notebook (Risk, Good plots)
+https://www.kaggle.com/code/ysthehurricane/advanced-stock-pred-using-svr-rfr-knn-lstm-gru/notebook (LSTM & GRU)
+https://www.kaggle.com/code/raoulma/ny-stock-price-prediction-rnn-lstm-gru/notebook (RNN, LSTM, GRU)
+https://www.kaggle.com/code/pavfedotov/lstm-to-predict-bitcoin-price 
+https://www.kaggle.com/code/alibulut1/bitcoin-price-prediction-with-using-lstm 
+https://www.kaggle.com/code/abdallahwagih/bitcoin-stock-prediction-using-lstm#LSTM-Model (Multi variable)
+https://www.kaggle.com/code/p7476762/bitcoin-predict-close-target-with-lstm (G-research with BTC)
+https://www.kaggle.com/code/debashis74017/time-series-forecasting-itcoin-price (LSTM & MLP)
+https://www.kaggle.com/code/iamllanjay/lstm-gru-on-prediction-of-bitcoin-price (Simple, LSTM+GRU)
+https://www.kaggle.com/code/ivanvarlamov/my-lstm-tutorial-witn-btc-price (Concise & theory)
+https://www.kaggle.com/code/tenebris97/btc-price-prediction-lstm-technical-analysis#RNN-(LSTM) (Features, Trading)
