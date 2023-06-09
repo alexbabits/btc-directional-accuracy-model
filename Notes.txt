@@ -1,0 +1,37 @@
+***Considerations & Thoughts***
+
+- Gaussian noise with rank gaussian to all features/targets. May work better than traditional scaling. 
+- Data can deviate from perfect Gaussian distribution. Usually has outliers, heavy-tails, skewness, and abnormal kurtosis. (sklearn QuantileTransformer)
+- Consider adding GRU/MLP models in addition to LSTM. Consider boosted hybrid with LGBM.
+- For Probability distribution output, models like Mixture Density Networks (MDNs) or generative models which can output a probability distribution.
+- Hyperparameter tuning with Optuna (Bayesian Optimization) if using LGBM.
+- Consider L2 Regularization, different activation function for LSTM and optimization algorithm other than ADAM.
+- More weight on current/closer prices to today. Yesterdays price is the best feature for tomorrows price as a baseline
+- If using multiple models, use different seeds for each one.
+- Consider minute or hourly data
+- try "exponential weighted" windows by using 'ewm' in place of 'rolling'; exponential decay can be a better representation of how effects propagate over time.
+- Consider log returns instead of returns. (First row will be empty, must drop.)
+- Multiple train and test periods (two sets)
+- Predict range of probabilties rather than one price. Certain probability for each price range where the mean is the predicted price.
+- Combine the 'returns' predictions which focuses on directoinal accuracy with price prediction model. (Predict multiple targets: [returns, price])
+- Probabiltiy distribution/predcition intervals: https://otexts.com/fpp2/prediction-intervals.html (one-step prediction intervals, etc.)
+- Exponential smoothing for weighted averages. More recent the observation the higher the associated weight. Weights decaying exponentially as the observations get older. https://otexts.com/fpp2/expsmooth.html
+- Drift method good for things trending upwards or downwards.
+- seasonal naïve method, good for quick up and downs like noise and sharp triangle sin-like movements. 
+
+
+Avoid data/information leakage/lookahead. Use lagged features/MA's/etc. A MA with a window size of 10 takes the average of the past 10 data points. This doesn't cause lookahead bias because it's only using past data, not future data. Lag features/target by one or more steps. 
+
+If predicting returns for tomorrow, use MA calculated up to today as a feature, not tomorrow. Ensures that our prediction for tomorrow is based entirely on information that's available today or earlier. 
+
+Most TA indicators are meant to be predictive of future price movements. Make sure they are lagged correctly.
+Use a shift in calculating the return to ensure that the target is strictly IN THE FUTURE relative to the features. "y_lag = df.loc[:, 'xyz'].shift(1)"
+
+Predicting tomorrows returns Features of returns for past N days (return_1day_ago, return_2days_ago, etc.). These lagged features give the model information about recent trends in the data. Or avg return over past week.
+
+
+
+
+
+
+
