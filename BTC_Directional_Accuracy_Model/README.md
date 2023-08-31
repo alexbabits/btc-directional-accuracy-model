@@ -23,4 +23,6 @@
 52.3% directional accuracy on test set predicting for direction of the returns.
 
 
-![test](price_vs_volume.png)
+![](price_vs_volume.png)
+![](scaled_stats.png)
+![](error_dists.png)
