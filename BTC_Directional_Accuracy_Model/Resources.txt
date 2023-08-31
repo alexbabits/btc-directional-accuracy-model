@@ -2,8 +2,8 @@ Tools/Resources used:
 
 Yahoo Finance: GOLD/DJI/DXY/SP500/NASDAQ
 Full/New Moons: NASA https://aa.usno.navy.mil/data/MoonPhases
-Halvenings: Google
-ChatGPT-3.5 & ChatGPT-4
+Halvenings: https://www.swanbitcoin.com/bitcoin-halving-dates/
+Helpers: ChatGPT-3.5 & ChatGPT-4
 https://www.blockchain.com/explorer/charts (no sentiment)
 https://www.lookintobitcoin.com/ (no sentiment)
 https://studio.glassnode.com/home/charts (no sentiment)
